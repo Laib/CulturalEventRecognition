@@ -1,0 +1,60 @@
+-------------------------------------------------------------------------
+ChaLearn Looking at People 2015 - Cultural Event Recognition - Team SSTK
+-------------------------------------------------------------------------
+
+We fine-tuned multiple pre-trained models using the bvlc caffe library for this task. Some of the models were pre-trained on Imagenet while others were pretrained on Places-205 dataset. We found that averaging the final predictions obtained from these models gives us the best overall accuracy on the validation set.
+
+To reproduce our results please run the pipeline following the instructions below:
+
+Data Preparation: 
+Create dataset/TRAIN, dataset/VAL and dataset/TEST symlinks so that they point to the right locations of the TRAIN, VAL and TEST images on your local setup respectively. You may use the commands below:
+  ln -s /path/to/event_recognition/dataset/TRAIN dataset/TRAIN
+  ln -s /path/to/event_recognition/dataset/VAL dataset/VAL
+  ln -s /path/to/event_recognition/dataset/TEST dataset/TEST
+
+Training, Predictions, Submissions:
+1. For training a model, enter the corresponding directory 'models/finetune_*' . Update the CAFFE variable in the Makefile to use your local caffe installation path.  Update the GPU variable to the id of the gpu you want to use. Type make train.
+
+2. Once a model is trained, you can use the generate_event_predictions_layer.py script and specify the model name, output layer and output size as command line arguments (see step 3)
+
+3. Repeat steps 1 and 2 steps for all the 16 prediction layers of the 13 trained models (googlenet and 8conv3fc_places have multiple prediction layers)
+
+For reference, you will be running the following commands to generate predictions from all the models once the training in completed:
+  python generate_event_predictions_layer.py --model_name alexnet --layer_name prob --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name nin --layer_name prob --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name vgg16 --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name vgg19 --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name hybridCNN --layer_name prob --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name googlenet --layer_name prob1 --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name googlenet --layer_name prob2 --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name googlenet --layer_name prob3 --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name 8conv3fc_places --layer_name prob1 --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name 8conv3fc_places --layer_name prob2 --mean npy --output_size 100
+  python generate_event_predictions_layer.py --model_name vgg11_places205 --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name vgg13_places205 --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name vggs --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name vggm --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name vggf --layer_name prob --mean bp --output_size 100
+  python generate_event_predictions_layer.py --model_name reduced_vgg16 --layer_name prob --mean npy --output_size 100
+
+4. Run average_model_predictions.py script to perform late fusion of predictions
+
+5. Finally execute the generate_txt_from_preds.py script to generate the text files for submissions
+
+Self-evaluation: (Optional)
+We did a 93-7 train-test split. Additional scripts for evaluating our model on the  test split (test_manifest) is provided in scripts/utils. This was used to come up with our final set of models.
+Example:
+  python generate_test_manifest_predictions.py --model_name reduced_vgg16 --layer_name prob --mean npy --output_size 100
+  python calc_accuracy.py --model_name reduced_vgg16 --layer_name prob
+After performing late_fusion on the 16 predictions on the test_manifest images, final top1-accuracy: 77.68% and top5-accuracy: 92% was obtained.
+
+Packages Required:
+1. BVLC Caffe
+2. Numpy
+
+Programming Language:
+Python 2.7
+
+The above system has been built and tested on an Ubuntu 14.04 machine. If you have any questions, please reach out to vaibhav.malpani@gmail.com
+
+-- Team SSTK (Vaibhav Malpani, David Chester, Nathan Hurst, Mike Ranzinger)

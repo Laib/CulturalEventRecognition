@@ -1,0 +1,17 @@
+net: "train_layers.prototxt"
+test_iter: 100
+test_interval: 1000
+test_initialization: false
+display: 40
+average_loss: 40
+base_lr: 0.0008
+lr_policy: "step"
+gamma: 0.5
+stepsize: 8000
+max_iter: 48000
+momentum: 0.85
+weight_decay: 0.0005
+snapshot: 4000
+snapshot_prefix: "finetune_VGGS"
+solver_mode: GPU
+solver_type: SGD
